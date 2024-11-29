@@ -1,8 +1,12 @@
 package com.github.enesusta.logback.openobserve.publisher;
 
+import ch.qos.logback.core.Context;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveAppenderSettings;
+import com.github.enesusta.logback.openobserve.domain.OpenObserveProperty;
+import com.github.enesusta.logback.openobserve.encoder.AbstractPropertyAndEncoder;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -18,6 +22,11 @@ public abstract class AbstractOpenObserverPublisher<T> implements Runnable {
           return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         }
       };
+
+  protected abstract void serializeCommonFields(JsonGenerator gen, T event) throws IOException;
+
+  protected abstract AbstractPropertyAndEncoder<T> buildPropertyAndEncoder(
+      Context context, OpenObserveProperty property);
 
   public static final String THREAD_NAME_PREFIX = "openobserve-writer-";
 
