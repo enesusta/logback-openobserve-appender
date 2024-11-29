@@ -1,5 +1,10 @@
 package com.github.enesusta.logback.openobserve.domain;
 
+import com.github.enesusta.logback.openobserve.OpenObserveOutputAggregator;
+import com.github.enesusta.logback.openobserve.io.DefaultOpenObserveWriter;
+import com.github.enesusta.logback.openobserve.io.LogbackOpenObserveWriter;
+import com.github.enesusta.logback.openobserve.io.StderrOpenObserveWriter;
+import com.github.enesusta.logback.openobserve.logback.LogbackErrorReporter;
 import java.net.URL;
 
 public class OpenObserveAppenderSettings {
@@ -21,6 +26,25 @@ public class OpenObserveAppenderSettings {
   private boolean rawJsonMessage;
   private int maxQueueSize = 100 * 1024 * 1024;
   private int maxMessageSize = -1;
+
+  public OpenObserveOutputAggregator populateAggregator(
+      LogbackErrorReporter errorReporter, OpenObserveHttpRequestHeaders headers) {
+    OpenObserveOutputAggregator spigot = new OpenObserveOutputAggregator(this, errorReporter);
+
+    if (isLogsToStderr()) {
+      spigot.addWriter(new StderrOpenObserveWriter());
+    }
+
+    if (getLoggerName() != null) {
+      spigot.addWriter(new LogbackOpenObserveWriter(getLoggerName()));
+    }
+
+    if (getUrl() != null) {
+      spigot.addWriter(new DefaultOpenObserveWriter(errorReporter, this, headers));
+    }
+
+    return spigot;
+  }
 
   public String getIndex() {
     return index;
