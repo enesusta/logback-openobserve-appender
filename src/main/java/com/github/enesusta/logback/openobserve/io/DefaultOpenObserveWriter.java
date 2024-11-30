@@ -28,9 +28,10 @@ public class DefaultOpenObserveWriter implements OpenObserveWriter {
       final OpenObserveHttpRequestHeaders headers) {
     this.errorReporter = errorReporter;
     this.settings = settings;
-    this.headers = headers != null && headers.getHeaders() != null
-        ? headers.getHeaders()
-        : Collections.<OpenObserveHttpRequestHeader>emptyList();
+    this.headers =
+        headers != null && headers.getHeaders() != null
+            ? headers.getHeaders()
+            : Collections.<OpenObserveHttpRequestHeader>emptyList();
     this.sendBuffer = new StringBuilder();
   }
 
@@ -56,7 +57,8 @@ public class DefaultOpenObserveWriter implements OpenObserveWriter {
       return;
     }
 
-    final HttpURLConnection urlConnection = (HttpURLConnection) (settings.getUrl().openConnection());
+    final HttpURLConnection urlConnection =
+        (HttpURLConnection) (settings.getUrl().openConnection());
     try {
       urlConnection.setDoInput(true);
       urlConnection.setDoOutput(true);
@@ -66,15 +68,22 @@ public class DefaultOpenObserveWriter implements OpenObserveWriter {
 
       final String body = sendBuffer.toString();
 
-      if (!headers.isEmpty()) {
-        for (final OpenObserveHttpRequestHeader header : headers) {
-          urlConnection.setRequestProperty(header.getName(), header.getValue());
-        }
+      for (final OpenObserveHttpRequestHeader header : headers) {
+        urlConnection.setRequestProperty(header.getName(), header.getValue());
+        System.out.println(header.getName() + " name" + " " + header.getValue() + " value");
       }
 
       // if (settings.getAuthentication() != null) {
       // settings.getAuthentication().addAuth(urlConnection, body);
       // }
+
+      final StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("[");
+      stringBuilder.append(body);
+      stringBuilder.setLength(stringBuilder.length() - 1);
+      stringBuilder.append("]");
+
+      System.out.println(stringBuilder);
 
       final Writer writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
       writer.write(body);

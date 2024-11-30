@@ -9,10 +9,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/** OpenObserveOutputAggregator */
 public class OpenObserveOutputAggregator extends Writer {
 
-  private StringBuilder sendBuffer;
   private LogbackErrorReporter errorReporter;
   private List<OpenObserveWriter> writers;
   private OpenObserveAppenderSettings settings;
@@ -38,7 +36,6 @@ public class OpenObserveOutputAggregator extends Writer {
   public boolean sendData() {
     boolean success = true;
     for (OpenObserveWriter writer : writers) {
-
       try {
         writer.sendData();
       } catch (IOException e) {
@@ -57,12 +54,10 @@ public class OpenObserveOutputAggregator extends Writer {
   }
 
   @Override
-  public void flush() throws IOException {
-  }
+  public void flush() throws IOException {}
 
   @Override
-  public void close() throws IOException {
-  }
+  public void close() throws IOException {}
 
   public boolean hasPendingData() {
     for (OpenObserveWriter writer : writers) {
