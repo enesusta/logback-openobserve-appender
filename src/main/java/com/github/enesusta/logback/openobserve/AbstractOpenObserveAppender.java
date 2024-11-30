@@ -7,6 +7,7 @@ import com.github.enesusta.logback.openobserve.domain.OpenObserveHttpRequestHead
 import com.github.enesusta.logback.openobserve.domain.OpenObserveProperties;
 import com.github.enesusta.logback.openobserve.logback.LogbackErrorReporter;
 import com.github.enesusta.logback.openobserve.publisher.AbstractOpenObserverPublisher;
+import com.github.enesusta.logback.openobserve.publisher.DebouncedOpenObservePublisher;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,14 +19,17 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
   protected OpenObserveProperties properties;
   protected LogbackErrorReporter logbackErrorReporter;
   protected AbstractOpenObserverPublisher<T> publisher;
+  protected DebouncedOpenObservePublisher<T> debouncedPublisher;
 
   public AbstractOpenObserveAppender() {
     this.settings = new OpenObserveAppenderSettings();
     this.headers = new OpenObserveHttpRequestHeaders();
+    this.debouncedPublisher = (DebouncedOpenObservePublisher<T>) DebouncedOpenObservePublisher.singleton();
   }
 
   public AbstractOpenObserveAppender(OpenObserveAppenderSettings openObserveAppenderSettings) {
     this.settings = openObserveAppenderSettings;
+    this.debouncedPublisher = (DebouncedOpenObservePublisher<T>) DebouncedOpenObservePublisher.singleton();
   }
 
   protected abstract void appendInternal(T eventObject);
@@ -41,6 +45,7 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
     System.out.println("PUBLISH_EVENT");
     try {
       publisher.addEvent(eventObject);
+      this.debouncedPublisher.addEvent(eventObject);
       final var objectMapper = new ObjectMapper();
       // System.out.println(objectMapper.writeValueAsString(openObserveAppenderSettings));
       // System.out.println(objectMapper.writeValueAsString(eventObject));
@@ -57,12 +62,15 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
   @Override
   public void start() {
     super.start();
+    this.debouncedPublisher.start();
     this.logbackErrorReporter = getErrorReporter();
     try {
       this.publisher = populatePublisher();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    // CompletableFuture.delayedExecutor(5,
+    // TimeUnit.SECONDS).execute(debouncedPublisher::start);
   }
 
   public void setProperties(OpenObserveProperties openObserveProperties) {
