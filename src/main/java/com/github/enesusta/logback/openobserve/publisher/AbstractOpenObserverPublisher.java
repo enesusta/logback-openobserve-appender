@@ -22,20 +22,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractOpenObserverPublisher<T> implements Runnable {
 
   private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(1);
-  private static final ThreadLocal<DateFormat> DATE_FORMAT =
-      new ThreadLocal<DateFormat>() {
-        @Override
-        protected DateFormat initialValue() {
-          return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        }
-      };
+  public static final String THREAD_NAME_PREFIX = "openobserve-writer-";
+  private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+      return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    }
+  };
 
   protected abstract void serializeCommonFields(JsonGenerator gen, T event) throws IOException;
 
   protected abstract AbstractPropertyAndEncoder<T> buildPropertyAndEncoder(
       Context context, OpenObserveProperty property);
-
-  public static final String THREAD_NAME_PREFIX = "openobserve-writer-";
 
   private volatile List<T> events;
   private OpenObserveOutputAggregator outputAggregator;
@@ -65,17 +63,15 @@ public abstract class AbstractOpenObserverPublisher<T> implements Runnable {
     this.events = new ArrayList<T>();
     this.lock = new Object();
     this.openObserveAppenderSettings = openObserveAppenderSettings;
-    this.outputAggregator =
-        openObserveAppenderSettings.populateAggregator(logbackErrorReporter, headers);
+    this.outputAggregator = openObserveAppenderSettings.populateAggregator(logbackErrorReporter, headers);
 
     this.jf = new JsonFactory();
     this.jf.setRootValueSeparator(null);
     this.jsonGenerator = jf.createGenerator(outputAggregator);
 
-    this.indexPattern =
-        buildPropertyAndEncoder(
-            context,
-            new OpenObserveProperty("<index>", openObserveAppenderSettings.getIndex(), false));
+    this.indexPattern = buildPropertyAndEncoder(
+        context,
+        new OpenObserveProperty("<index>", openObserveAppenderSettings.getIndex(), false));
     this.propertyList = generatePropertyList(context, properties);
     this.propertySerializer = new JacksonPropertySerializer();
   }
