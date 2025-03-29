@@ -2,13 +2,13 @@ package com.github.enesusta.logback.openobserve.encoder;
 
 import ch.qos.logback.core.Context;
 import ch.qos.logback.core.pattern.PatternLayoutBase;
-import com.github.enesusta.logback.openobserve.domain.OpenObserveProperty;
+import com.github.enesusta.logback.openobserve.domain.Property;
 
 public abstract class AbstractPropertyAndEncoder<T> {
-  private OpenObserveProperty property;
+  private Property property;
   private PatternLayoutBase<T> layout;
 
-  public AbstractPropertyAndEncoder(OpenObserveProperty property, Context context) {
+  public AbstractPropertyAndEncoder(Property property, Context context) {
     this.property = property;
     this.layout = getLayout();
     this.layout.setContext(context);
@@ -31,7 +31,7 @@ public abstract class AbstractPropertyAndEncoder<T> {
     return property.isAllowEmpty();
   }
 
-  public OpenObserveProperty.Type getType() {
+  public Property.Type getType() {
     return property.getType();
   }
 }

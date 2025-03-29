@@ -4,11 +4,11 @@ import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Context;
 import ch.qos.logback.core.pattern.PatternLayoutBase;
-import com.github.enesusta.logback.openobserve.domain.OpenObserveProperty;
+import com.github.enesusta.logback.openobserve.domain.Property;
 
 public class ClassicPropertyAndEncoder extends AbstractPropertyAndEncoder<ILoggingEvent> {
 
-  public ClassicPropertyAndEncoder(OpenObserveProperty property, Context context) {
+  public ClassicPropertyAndEncoder(Property property, Context context) {
     super(property, context);
   }
 

@@ -8,7 +8,8 @@ import java.io.IOException;
 
 public class OpenObserveAppender extends AbstractOpenObserveAppender<ILoggingEvent> {
 
-  public OpenObserveAppender() {}
+  public OpenObserveAppender() {
+  }
 
   public OpenObserveAppender(OpenObserveAppenderSettings settings) {
     super(settings);
@@ -18,19 +19,16 @@ public class OpenObserveAppender extends AbstractOpenObserveAppender<ILoggingEve
   protected void appendInternal(final ILoggingEvent eventObject) {
     String targetLogger = eventObject.getLoggerName();
     String loggerName = settings.getLoggerName();
-    if (loggerName != null && loggerName.equals(targetLogger)) {
+    if (loggerName != null && loggerName.equals(targetLogger))
       return;
-    }
 
     String errorLoggerName = settings.getErrorLoggerName();
-    if (errorLoggerName != null && errorLoggerName.equals(targetLogger)) {
+    if (errorLoggerName != null && errorLoggerName.equals(targetLogger))
       return;
-    }
 
     eventObject.prepareForDeferredProcessing();
-    if (settings.isIncludeCallerData()) {
+    if (settings.isIncludeCallerData())
       eventObject.getCallerData();
-    }
 
     publishEvent(eventObject);
   }
@@ -41,14 +39,3 @@ public class OpenObserveAppender extends AbstractOpenObserveAppender<ILoggingEve
         getContext(), settings, headers, properties, logbackErrorReporter);
   }
 }
-
-// String targetLogger = eventObject.getLoggerName();
-// try {
-// var objectMapper = new ObjectMapper();
-// System.out.println(targetLogger);
-// System.out.println(objectMapper.writeValueAsString(settings));
-// System.out.println(objectMapper.writeValueAsString(eventObject));
-// } catch (JsonProcessingException e) {
-// // TODO Auto-generated catch block
-// e.printStackTrace();
-// }

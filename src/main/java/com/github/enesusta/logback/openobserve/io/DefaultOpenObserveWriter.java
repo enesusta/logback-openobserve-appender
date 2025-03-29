@@ -1,26 +1,32 @@
 package com.github.enesusta.logback.openobserve.io;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveAppenderSettings;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveHttpRequestHeader;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveHttpRequestHeaders;
 import com.github.enesusta.logback.openobserve.logback.LogbackErrorReporter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class DefaultOpenObserveWriter implements OpenObserveWriter {
 
-  private final StringBuilder sendBuffer;
   private final LogbackErrorReporter errorReporter;
   private final Collection<OpenObserveHttpRequestHeader> headers;
   private final OpenObserveAppenderSettings settings;
 
-  private boolean bufferExceeded;
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  static {
+    OBJECT_MAPPER.registerModule(new JavaTimeModule());
+    OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+  }
 
   public DefaultOpenObserveWriter(
       final LogbackErrorReporter errorReporter,
@@ -32,102 +38,36 @@ public class DefaultOpenObserveWriter implements OpenObserveWriter {
         headers != null && headers.getHeaders() != null
             ? headers.getHeaders()
             : Collections.<OpenObserveHttpRequestHeader>emptyList();
-    this.sendBuffer = new StringBuilder();
   }
 
   @Override
-  public void write(final char[] cbuf, final int off, final int len) {
-    if (bufferExceeded) {
-      return;
-    }
-
-    sendBuffer.append(cbuf, off, len);
-
-    if (sendBuffer.length() >= settings.getMaxQueueSize()) {
-      errorReporter.logWarning(
-          "Send queue maximum size exceeded - log messages will be lost until the buffer is"
-              + " cleared");
-      bufferExceeded = true;
-    }
-  }
-
-  @Override
-  public void sendData() throws IOException {
-    if (sendBuffer.length() <= 0) {
-      return;
-    }
-
+  public void write(ByteArrayOutputStream byteArrayOutputStream) throws IOException {
     final HttpURLConnection urlConnection =
         (HttpURLConnection) (settings.getUrl().openConnection());
+
     try {
+      final var mappedHeaders =
+          this.headers.stream()
+              .collect(
+                  Collectors.toMap(OpenObserveHttpRequestHeader::getName, item -> item.getValue()));
+
+      urlConnection.setRequestProperty("Authorization", mappedHeaders.get("Authorization"));
       urlConnection.setDoInput(true);
       urlConnection.setDoOutput(true);
       urlConnection.setReadTimeout(settings.getReadTimeout());
       urlConnection.setConnectTimeout(settings.getConnectTimeout());
       urlConnection.setRequestMethod("POST");
 
-      final String body = sendBuffer.toString();
+      String body = new String(byteArrayOutputStream.toByteArray(), "UTF-8");
+      System.out.println(body);
 
-      for (final OpenObserveHttpRequestHeader header : headers) {
-        urlConnection.setRequestProperty(header.getName(), header.getValue());
-        System.out.println(header.getName() + " name" + " " + header.getValue() + " value");
-      }
-
-      // if (settings.getAuthentication() != null) {
-      // settings.getAuthentication().addAuth(urlConnection, body);
-      // }
-
-      final StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("[");
-      stringBuilder.append(body);
-      stringBuilder.setLength(stringBuilder.length() - 1);
-      stringBuilder.append("]");
-
-      System.out.println(stringBuilder);
-
-      final Writer writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
-      writer.write(body);
-      writer.flush();
-      writer.close();
+      OutputStream outputStream = urlConnection.getOutputStream();
+      outputStream.write(byteArrayOutputStream.toByteArray());
+      outputStream.flush();
 
       final int rc = urlConnection.getResponseCode();
-      if (rc != 200) {
-        final String data = slurpErrors(urlConnection);
-        throw new IOException("Got response code [" + rc + "] from server with data " + data);
-      }
     } finally {
       urlConnection.disconnect();
-    }
-
-    sendBuffer.setLength(0);
-    if (bufferExceeded) {
-      errorReporter.logInfo("Send queue cleared - log messages will no longer be lost");
-      bufferExceeded = false;
-    }
-  }
-
-  @Override
-  public boolean hasPendingData() {
-    return sendBuffer.length() != 0;
-  }
-
-  private static String slurpErrors(final HttpURLConnection urlConnection) {
-    try {
-      final InputStream stream = urlConnection.getErrorStream();
-      if (stream == null) {
-        return "<no data>";
-      }
-
-      final StringBuilder builder = new StringBuilder();
-      final InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
-      final char[] buf = new char[2048];
-      int numRead;
-      while ((numRead = reader.read(buf)) > 0) {
-        builder.append(buf, 0, numRead);
-      }
-      return builder.toString();
-    } catch (final Exception e) {
-      return "<error retrieving data: " + e.getMessage() + ">";
     }
   }
 }

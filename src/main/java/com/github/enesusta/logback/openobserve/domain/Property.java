@@ -1,6 +1,6 @@
 package com.github.enesusta.logback.openobserve.domain;
 
-public class OpenObserveProperty {
+public class Property {
   private String name;
   private String value;
   private boolean allowEmpty;
@@ -13,9 +13,10 @@ public class OpenObserveProperty {
     BOOLEAN
   }
 
-  public OpenObserveProperty() {}
+  public Property() {
+  }
 
-  public OpenObserveProperty(String name, String value, boolean allowEmpty) {
+  public Property(String name, String value, boolean allowEmpty) {
     this.name = name;
     this.value = value;
     this.allowEmpty = allowEmpty;

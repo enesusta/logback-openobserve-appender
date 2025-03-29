@@ -1,13 +1,11 @@
 package com.github.enesusta.logback.openobserve;
 
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveAppenderSettings;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveHttpRequestHeaders;
 import com.github.enesusta.logback.openobserve.domain.OpenObserveProperties;
 import com.github.enesusta.logback.openobserve.logback.LogbackErrorReporter;
 import com.github.enesusta.logback.openobserve.publisher.AbstractOpenObserverPublisher;
-import com.github.enesusta.logback.openobserve.publisher.DebouncedOpenObservePublisher;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,19 +15,17 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
   protected OpenObserveAppenderSettings settings;
   protected OpenObserveHttpRequestHeaders headers;
   protected OpenObserveProperties properties;
+
   protected LogbackErrorReporter logbackErrorReporter;
   protected AbstractOpenObserverPublisher<T> publisher;
-  protected DebouncedOpenObservePublisher<T> debouncedPublisher;
 
   public AbstractOpenObserveAppender() {
     this.settings = new OpenObserveAppenderSettings();
     this.headers = new OpenObserveHttpRequestHeaders();
-    this.debouncedPublisher = (DebouncedOpenObservePublisher<T>) DebouncedOpenObservePublisher.singleton();
   }
 
   public AbstractOpenObserveAppender(OpenObserveAppenderSettings openObserveAppenderSettings) {
     this.settings = openObserveAppenderSettings;
-    this.debouncedPublisher = (DebouncedOpenObservePublisher<T>) DebouncedOpenObservePublisher.singleton();
   }
 
   protected abstract void appendInternal(T eventObject);
@@ -42,16 +38,7 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
   }
 
   protected void publishEvent(T eventObject) {
-    System.out.println("PUBLISH_EVENT");
-    try {
-      publisher.addEvent(eventObject);
-      this.debouncedPublisher.addEvent(eventObject);
-      final var objectMapper = new ObjectMapper();
-      // System.out.println(objectMapper.writeValueAsString(openObserveAppenderSettings));
-      // System.out.println(objectMapper.writeValueAsString(eventObject));
-    } catch (final Throwable e) {
-      System.out.println("PUBLISH_EVENT" + e);
-    }
+    publisher.addEvent(eventObject);
   }
 
   // VisibleForTesting
@@ -62,15 +49,15 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
   @Override
   public void start() {
     super.start();
-    this.debouncedPublisher.start();
     this.logbackErrorReporter = getErrorReporter();
     try {
       this.publisher = populatePublisher();
+      Thread t = new Thread(this.publisher);
+      t.setDaemon(true);
+      t.start();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    // CompletableFuture.delayedExecutor(5,
-    // TimeUnit.SECONDS).execute(debouncedPublisher::start);
   }
 
   public void setProperties(OpenObserveProperties openObserveProperties) {
@@ -140,10 +127,6 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
   public void setIncludeMdc(boolean includeMdc) {
     settings.setIncludeMdc(includeMdc);
   }
-
-  // public void setAuthentication(Authentication auth) {
-  // settings.setAuthentication(auth);
-  // }
 
   public void setMaxMessageSize(int maxMessageSize) {
     settings.setMaxMessageSize(maxMessageSize);
