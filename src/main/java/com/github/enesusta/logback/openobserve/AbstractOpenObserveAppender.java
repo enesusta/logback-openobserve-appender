@@ -56,12 +56,23 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
       t.setDaemon(true);
       t.start();
     } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 
   public void setProperties(OpenObserveProperties openObserveProperties) {
     this.properties = openObserveProperties;
+  }
+
+  public void setInitialDelay(long initialDelay) {
+    settings.setInitialDelay(initialDelay);
+  }
+
+  public void setDelay(long delay) {
+    settings.setDelay(delay);
+  }
+
+  public void setTimeUnit(String timeUnit) {
+    settings.setTimeUnit(timeUnit);
   }
 
   public void setSleepTime(int sleepTime) {
@@ -94,10 +105,6 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
 
   public void setMaxQueueSize(int maxQueueSize) {
     settings.setMaxQueueSize(maxQueueSize);
-  }
-
-  public void setIndex(String index) {
-    settings.setIndex(index);
   }
 
   public void setType(String type) {

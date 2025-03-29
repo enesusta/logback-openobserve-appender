@@ -7,7 +7,7 @@
 
   <groupId>com.github.enesusta</groupId>
   <artifactId>logback-openobserve-appender</artifactId>
-  <version>0.8</version>
+  <version>0.9</version>
 
   <name>logback-openobserve-appender</name>
 

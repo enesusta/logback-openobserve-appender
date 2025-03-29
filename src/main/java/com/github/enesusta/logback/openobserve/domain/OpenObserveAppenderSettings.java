@@ -3,7 +3,6 @@ package com.github.enesusta.logback.openobserve.domain;
 import java.net.URL;
 
 public class OpenObserveAppenderSettings {
-  private String index;
   private String type;
   private URL url;
 
@@ -14,21 +13,19 @@ public class OpenObserveAppenderSettings {
   private int maxRetries = 3;
   private int connectTimeout = 30000;
   private int readTimeout = 30000;
+
+  private long initialDelay = 0;
+  private long delay = 1;
+  private String timeUnit = "SECONDS";
+
+  private int maxQueueSize = 100 * 1024 * 1024;
+  private int maxMessageSize = -1;
+
   private boolean logsToStderr;
   private boolean errorsToStderr;
   private boolean includeCallerData;
   private boolean includeMdc;
   private boolean rawJsonMessage;
-  private int maxQueueSize = 100 * 1024 * 1024;
-  private int maxMessageSize = -1;
-
-  public String getIndex() {
-    return index;
-  }
-
-  public void setIndex(String index) {
-    this.index = index;
-  }
 
   public String getType() {
     return type;
@@ -148,5 +145,29 @@ public class OpenObserveAppenderSettings {
 
   public void setMaxMessageSize(int maxMessageSize) {
     this.maxMessageSize = maxMessageSize;
+  }
+
+  public long getInitialDelay() {
+    return initialDelay;
+  }
+
+  public void setInitialDelay(long initialDelay) {
+    this.initialDelay = initialDelay;
+  }
+
+  public long getDelay() {
+    return delay;
+  }
+
+  public void setDelay(long delay) {
+    this.delay = delay;
+  }
+
+  public String getTimeUnit() {
+    return timeUnit;
+  }
+
+  public void setTimeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
   }
 }

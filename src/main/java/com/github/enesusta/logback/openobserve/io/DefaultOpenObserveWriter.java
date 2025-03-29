@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DefaultOpenObserveWriter implements OpenObserveWriter {
@@ -46,7 +47,7 @@ public class DefaultOpenObserveWriter implements OpenObserveWriter {
         (HttpURLConnection) (settings.getUrl().openConnection());
 
     try {
-      final var mappedHeaders =
+      final Map<String, String> mappedHeaders =
           this.headers.stream()
               .collect(
                   Collectors.toMap(OpenObserveHttpRequestHeader::getName, item -> item.getValue()));
@@ -57,9 +58,6 @@ public class DefaultOpenObserveWriter implements OpenObserveWriter {
       urlConnection.setReadTimeout(settings.getReadTimeout());
       urlConnection.setConnectTimeout(settings.getConnectTimeout());
       urlConnection.setRequestMethod("POST");
-
-      String body = new String(byteArrayOutputStream.toByteArray(), "UTF-8");
-      System.out.println(body);
 
       OutputStream outputStream = urlConnection.getOutputStream();
       outputStream.write(byteArrayOutputStream.toByteArray());
