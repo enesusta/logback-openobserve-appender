@@ -41,7 +41,7 @@ In your `logback.xml`:
             <header>
                 <name>Authorization</name>
                 <value>
-                    <!-- your openobserve credentials converted in base64 -->
+                    <!-- basic auth credentials -->
                 </value>
             </header>
         </headers>
@@ -93,7 +93,7 @@ In your `logback.xml`:
 - `initialDelay` (optional, default 0): OpenObserve appender runs a scheduled job which publish logback events to OpenObserve server, this option will be used in mentioned scheduled job to designate initial delay (in TimeUnit that you specify)
 - `delay` (optional, default 1): OpenObserve appender runs a scheduled job which publish logback events to OpenObserve server, this option will be used in mentioned scheduled job to designate delay (in TimeUnit that you specify)
 - `timeUnit` (optional, default SECONDS): OpenObserve appender runs a scheduled job which publish logback events to OpenObserve server, this option will be used in mentioned scheduled job to designate frequency in your job
-  - Available options for [TimeUnit]:
+  - Available options for \[TimeUnit\]:
     - DAYS
     - HOURS
     - MINUTES

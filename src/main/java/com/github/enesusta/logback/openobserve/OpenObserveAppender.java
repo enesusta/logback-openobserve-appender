@@ -11,18 +11,18 @@ public class OpenObserveAppender extends AbstractOpenObserveAppender<ILoggingEve
   public OpenObserveAppender() {
   }
 
-  public OpenObserveAppender(OpenObserveAppenderSettings settings) {
+  public OpenObserveAppender(final OpenObserveAppenderSettings settings) {
     super(settings);
   }
 
   @Override
   protected void appendInternal(final ILoggingEvent eventObject) {
-    String targetLogger = eventObject.getLoggerName();
-    String loggerName = settings.getLoggerName();
+    final String targetLogger = eventObject.getLoggerName();
+    final String loggerName = settings.getLoggerName();
     if (loggerName != null && loggerName.equals(targetLogger))
       return;
 
-    String errorLoggerName = settings.getErrorLoggerName();
+    final String errorLoggerName = settings.getErrorLoggerName();
     if (errorLoggerName != null && errorLoggerName.equals(targetLogger))
       return;
 
@@ -36,6 +36,6 @@ public class OpenObserveAppender extends AbstractOpenObserveAppender<ILoggingEve
   @Override
   protected AbstractOpenObserverPublisher<ILoggingEvent> populatePublisher() throws IOException {
     return new DefaultOpenObservePublisher(
-        getContext(), settings, headers, properties, logbackErrorReporter);
+        getContext(), settings, headers, properties, logbackErrorReporter, this::stop);
   }
 }

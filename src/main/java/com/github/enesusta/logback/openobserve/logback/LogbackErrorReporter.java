@@ -19,6 +19,10 @@ public class LogbackErrorReporter extends ContextAwareBase {
     if (loggerName != null) {
       LoggerFactory.getLogger(loggerName).error(message, e);
     }
+    if (settings.isErrorsToStderr()) {
+      System.err.println("ERROR: " + message);
+      e.printStackTrace(System.err);
+    }
     addError(message, e);
   }
 
@@ -26,6 +30,9 @@ public class LogbackErrorReporter extends ContextAwareBase {
     String loggerName = settings.getErrorLoggerName();
     if (loggerName != null) {
       LoggerFactory.getLogger(loggerName).warn(message);
+    }
+    if (settings.isErrorsToStderr()) {
+      System.err.println("WARN: " + message);
     }
     addWarn(message);
   }

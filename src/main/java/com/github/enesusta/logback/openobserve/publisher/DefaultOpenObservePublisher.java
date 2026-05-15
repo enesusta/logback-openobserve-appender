@@ -20,25 +20,22 @@ public class DefaultOpenObservePublisher extends AbstractOpenObserverPublisher<I
       OpenObserveAppenderSettings openObserveAppenderSettings,
       OpenObserveHttpRequestHeaders headers,
       OpenObserveProperties properties,
-      LogbackErrorReporter logbackErrorReporter)
+      LogbackErrorReporter logbackErrorReporter,
+      Runnable stopCallback)
       throws IOException {
-    super(context, openObserveAppenderSettings, headers, properties, logbackErrorReporter);
+    super(context, openObserveAppenderSettings, headers, properties, logbackErrorReporter, stopCallback);
   }
 
   @Override
   protected void serializeCommonFields(JsonGenerator gen, ILoggingEvent event) throws IOException {
-    // gen.writeObjectField("_timestamp", getTimestamp(event.getTimeStamp()));
-    // gen.writeObjectField("@timestamp", getTimestamp(event.getTimeStamp()));0
-    //
-    // if (openObserveAppenderSettings.isRawJsonMessage()) {
-    // gen.writeFieldName("message");
-    // gen.writeRawValue(event.getFormattedMessage());
-    // } else {
-    //
-    // }
+    gen.writeNumberField("_timestamp", event.getTimeStamp() * 1000L);
 
-    String formattedMessage = event.getFormattedMessage();
-    gen.writeObjectField("message", formattedMessage);
+    if (openObserveAppenderSettings.isRawJsonMessage()) {
+      gen.writeFieldName("message");
+      gen.writeRawValue(event.getFormattedMessage());
+    } else {
+      gen.writeObjectField("message", event.getFormattedMessage());
+    }
 
     if (openObserveAppenderSettings.isIncludeMdc()) {
       for (Map.Entry<String, String> entry : event.getMDCPropertyMap().entrySet()) {

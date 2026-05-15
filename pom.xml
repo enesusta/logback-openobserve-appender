@@ -7,7 +7,7 @@
 
   <groupId>com.github.enesusta</groupId>
   <artifactId>logback-openobserve-appender</artifactId>
-  <version>0.9</version>
+  <version>0.1.14</version>
 
   <name>logback-openobserve-appender</name>
 
@@ -47,11 +47,6 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.8.0</version>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

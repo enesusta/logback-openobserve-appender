@@ -56,6 +56,8 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
       t.setDaemon(true);
       t.start();
     } catch (IOException e) {
+      addError("Failed to start OpenObserve publisher", e);
+      stop();
     }
   }
 
@@ -73,14 +75,6 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
 
   public void setTimeUnit(String timeUnit) {
     settings.setTimeUnit(timeUnit);
-  }
-
-  public void setSleepTime(int sleepTime) {
-    settings.setSleepTime(sleepTime);
-  }
-
-  public void setMaxRetries(int maxRetries) {
-    settings.setMaxRetries(maxRetries);
   }
 
   public void setConnectTimeout(int connectTimeout) {
@@ -107,10 +101,6 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
     settings.setMaxQueueSize(maxQueueSize);
   }
 
-  public void setType(String type) {
-    settings.setType(type);
-  }
-
   public void setUrl(String url) throws MalformedURLException {
     settings.setUrl(new URL(url));
   }
@@ -133,9 +123,5 @@ public abstract class AbstractOpenObserveAppender<T> extends UnsynchronizedAppen
 
   public void setIncludeMdc(boolean includeMdc) {
     settings.setIncludeMdc(includeMdc);
-  }
-
-  public void setMaxMessageSize(int maxMessageSize) {
-    settings.setMaxMessageSize(maxMessageSize);
   }
 }

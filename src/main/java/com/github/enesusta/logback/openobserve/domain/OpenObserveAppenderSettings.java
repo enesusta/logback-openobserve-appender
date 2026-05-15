@@ -3,14 +3,11 @@ package com.github.enesusta.logback.openobserve.domain;
 import java.net.URL;
 
 public class OpenObserveAppenderSettings {
-  private String type;
   private URL url;
 
   private String loggerName;
   private String errorLoggerName;
 
-  private int sleepTime = 250;
-  private int maxRetries = 3;
   private int connectTimeout = 30000;
   private int readTimeout = 30000;
 
@@ -18,22 +15,13 @@ public class OpenObserveAppenderSettings {
   private long delay = 1;
   private String timeUnit = "SECONDS";
 
-  private int maxQueueSize = 100 * 1024 * 1024;
-  private int maxMessageSize = -1;
+  private int maxQueueSize = 10_000;
 
   private boolean logsToStderr;
   private boolean errorsToStderr;
   private boolean includeCallerData;
   private boolean includeMdc;
   private boolean rawJsonMessage;
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
 
   public URL getUrl() {
     return url;
@@ -57,22 +45,6 @@ public class OpenObserveAppenderSettings {
 
   public void setErrorLoggerName(String errorLoggerName) {
     this.errorLoggerName = errorLoggerName;
-  }
-
-  public int getSleepTime() {
-    return sleepTime;
-  }
-
-  public void setSleepTime(int sleepTime) {
-    this.sleepTime = sleepTime;
-  }
-
-  public int getMaxRetries() {
-    return maxRetries;
-  }
-
-  public void setMaxRetries(int maxRetries) {
-    this.maxRetries = maxRetries;
   }
 
   public int getConnectTimeout() {
@@ -137,14 +109,6 @@ public class OpenObserveAppenderSettings {
 
   public void setMaxQueueSize(int maxQueueSize) {
     this.maxQueueSize = maxQueueSize;
-  }
-
-  public int getMaxMessageSize() {
-    return maxMessageSize;
-  }
-
-  public void setMaxMessageSize(int maxMessageSize) {
-    this.maxMessageSize = maxMessageSize;
   }
 
   public long getInitialDelay() {
